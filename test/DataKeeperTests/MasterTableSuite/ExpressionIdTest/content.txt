@@ -1,0 +1,15 @@
+!|insert|t|
+|a|b|
+|ID1|luke|
+
+!|commit|
+
+Use an expression for business id. In this case, concatenating columns a and b.
+!define sourceMasterId {a||b}
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+|query|select * from mt|
+|mkey|mid?|
+|1|ID1luke|

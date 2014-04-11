@@ -1,0 +1,51 @@
+!include -setup MetaSetUp
+!4 Can sync source table to destination tables with different schema
+Create alternate schema with a table of the same name
+!|execute| create user dbfittest identified by "password" default tablespace users quota unlimited on users |
+!|execute| grant create any table to dbfittest |
+!|execute| create table dbfittest.s_t (a number primary key, b varchar2(50), c date, row_load_dttm date, row_deleted_flag varchar2(1)) |
+!define syncSchema {dbfittest}
+
+!|insert| t |
+|a|b|c|
+|1|foo|2013-02-03|
+!|commit|
+
+Sync to dbfittest.s_t and not dbfituser.s_t
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from dbfittest.s_t |
+|a|b?|c?|
+|1|foo|2013-02-03|
+
+|ordered query|select count(*) as row_count from dbfituser.s_t |
+|row_count|
+|0|
+
+Sync updates to dbfittest.s_t
+!|update| t |
+|a|b=|
+|1|bar|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from dbfittest.s_t |
+|a|b?|
+|1|bar|
+
+Sync deletes to dbfittest.s_t
+!|execute|delete from t |
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from dbfittest.s_t |
+|a|row_deleted_flag?|
+|1|Y|
+
+!|execute| drop table dbfittest.s_t |
+!|execute| drop user dbfittest cascade |

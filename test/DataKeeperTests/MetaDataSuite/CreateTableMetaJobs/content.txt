@@ -1,0 +1,6 @@
+!|execute|!- create table meta_jobs (
+job_key number(18) primary key,
+job_id varchar2(255),
+job_description varchar2(255),
+job_type_id varchar2(30)
+) -!|

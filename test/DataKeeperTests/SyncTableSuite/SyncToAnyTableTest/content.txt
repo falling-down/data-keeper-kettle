@@ -1,0 +1,66 @@
+!include -setup MetaSetUp
+!4 Can sync source table to different destination tables
+Create alternate table
+!|execute|create table s_t2 (a number primary key, b varchar2(50), c date, row_load_dttm date, row_deleted_flag varchar2(1))|
+!|execute|grant select, insert, update, delete on s_t2 to etladmin |
+
+!|insert| t |
+|a|b|c|
+|1|foo|2013-02-03|
+!|commit|
+
+Sync to s_t and not s_t2
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|foo|2013-02-03|
+
+|ordered query|select count(*) as row_count from s_t2 |
+|row_count|
+|0|
+
+!|execute| delete from s_t |
+!|execute| delete from s_t2 |
+!|commit|
+
+Sync to s_t2 and not s_t
+!define syncTable {s_t2}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t2 |
+|a|b?|c?|
+|1|foo|2013-02-03|
+
+|ordered query|select count(*) as row_count from s_t |
+|row_count|
+|0|
+
+Sync updates to s_t2
+!|update| t |
+|a|b=|
+|1|bar|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t2 |
+|a|b?|
+|1|bar|
+
+Sync deletes to s_t2
+!|execute|delete from t |
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t2 |
+|a|row_deleted_flag?|
+|1|Y|
+
+!|execute|drop table s_t2|
+

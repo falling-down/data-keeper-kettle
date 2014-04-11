@@ -1,0 +1,42 @@
+!include -setup MetaSetUp
+!4 Row Load Datetime gets date and time the row was loaded
+!|insert| t |
+|a|b|
+|1|foo|
+!|commit|
+
+Rounding to the hour to make sure time is included.
+Cannot use the exact time because there is delay from when
+we capture the time to when the transformation runs.
+There is a very slight chance that the timing will be off and this will fail,
+but if so rerun just to verify.
+|query|select trunc(sysdate,'hh') as tm from dual|
+|tm?|
+|>>loadtime|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select a, trunc(row_load_dttm,'hh') as row_load_dttm from s_t |
+|a|row_load_dttm?|
+|1|<<loadtime|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+!4 Row Load datetime is updated when the row is changed
+!|insert| t |
+|a|b|
+|1|bar|
+
+!|insert| s_t |
+|a|b|row_load_dttm|
+|1|foo|2000-01-01|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t|
+|a|row_load_dttm?|
+|1|fail[2000-01-01]|

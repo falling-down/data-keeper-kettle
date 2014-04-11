@@ -1,0 +1,20 @@
+There could be cases where business keys come from a denormalized source.
+
+If when a new business key is first detected and it has multiple instances in the source,
+the ETL should not try to insert both instances (or least not fail because of it).
+
+!|execute| alter table t drop primary key drop index |
+
+!|insert|t|
+|a|b|
+|ID1|luke|
+|ID1|skywalker|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+!|query|select * from mt|
+|mkey|mid?|
+|1|ID1|

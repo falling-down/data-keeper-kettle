@@ -1,0 +1,20 @@
+!|execute| alter table t drop primary key |
+
+We do not want to insert NULL IDs into the master table because
+tends to cause unexpected behavior.
+
+!|insert|t|
+|a|b|
+|null|luke|
+|ID2|han|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+Do not insert NULL Ids.
+
+!|query|select * from mt|
+|mkey|mid?|
+|1|ID2|

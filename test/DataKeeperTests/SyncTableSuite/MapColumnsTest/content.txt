@@ -1,0 +1,26 @@
+!4 Destination columns can have different name than source.
+!|execute| alter table s_t rename column a to x |
+!|execute| alter table s_t rename column b to y |
+!|execute| alter table s_t rename column c to z |
+
+In this table we map the source to the sync columns.
+!|insert| meta_sync_columns |
+|source_column|sync_column|
+|a|x|
+|b|y|
+|c|z|
+!|commit|
+
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+!|commit|
+
+Do not forget to adjust SYNC_MATCH_ID.
+!define syncMatchId {x}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|x|y?|z?|
+|1|luke|2013-02-03|

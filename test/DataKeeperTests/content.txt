@@ -1,0 +1,25 @@
+Data Keeper Test Suite
+
+!****>  Oracle code for dbfituser. For Development Only!
+{{{
+create user dbfituser identified by "password";
+grant create session to dbfituser with admin option;
+grant select any table to dbfituser with admin option;
+grant insert any table to dbfituser with admin option;
+grant update any table to dbfituser with admin option;
+grant delete any table to dbfituser with admin option;
+grant create any table to dbfituser with admin option;
+grant create any index to dbfituser with admin option;
+grant grant any object privilege to dbfituser;
+grant drop any table to dbfituser;
+grant create any view to dbfituser;
+grant drop any view to dbfituser;
+ALTER USER dbfituser DEFAULT TABLESPACE USERS;
+GRANT UNLIMITED TABLESPACE TO dbfituser;
+grant create user to dbfituser;
+grant alter user to dbfituser;
+grant drop user to dbfituser;
+}}}
+*******!
+
+!contents -R2 -g -p -f -h

@@ -1,0 +1,32 @@
+!4 Allow multiple sync column configurations to exist in metadata at one time.
+!|insert|t|
+|a|b|c|
+|1|luke|2010-01-01|
+
+!|insert| meta_sync_columns |
+|transformation_key|source_column|sync_column|
+|1|a|a|
+|1|c|c|
+|2|a|a|
+|2|b|b|
+!|commit|
+
+!define transKey {1}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|null|2010-01-01|
+
+!|execute| delete from s_t |
+!|commit|
+
+!define transKey {2}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|null|
+

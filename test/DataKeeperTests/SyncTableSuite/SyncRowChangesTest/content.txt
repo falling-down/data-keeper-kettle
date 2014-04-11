@@ -1,0 +1,17 @@
+!include -setup MetaSetUp
+!4 Changes in the source should replicate to sync
+!|insert| t |
+|a|b|c|
+|1|bar|2014-05-06|
+
+!|insert| s_t |
+|a|b|c|
+|1|foo|2013-02-03|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|bar|2014-05-06|

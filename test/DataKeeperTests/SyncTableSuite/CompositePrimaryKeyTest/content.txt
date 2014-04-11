@@ -1,0 +1,73 @@
+!include -setup MetaSetUp
+!4 Can sync tables with composite primary keys
+Create dummy source and sync table with composite primary key
+!|execute|drop table t|
+!|execute|drop table s_t|
+!|execute|create table t (a number, b number, c varchar2(50), constraint t_pk primary key (a,b) )|
+!|execute|create table s_t (a number, b number, c varchar2(50), row_load_dttm date, row_deleted_flag varchar2(1), constraint s_t_pk primary key (a,b))|
+
+!define sourceMatchId {to_char(a)||'-'||to_char(b)}
+!define syncMatchId {to_char(a)||'-'||to_char(b)}
+
+Insert new rows
+!|insert|t|
+|a|b|c|
+|1|1|luke|
+|1|2|leia|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+!|query| select * from s_t |
+|a|b|c?|
+|1|1|luke|
+|1|2|leia|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+Update rows
+!|insert|t|
+|a|b|c|
+|1|1|han|
+|1|2|chewbacca|
+
+!|insert|s_t|
+|a|b|c|row_load_dttm|row_deleted_flag|
+|1|1|luke|2001-01-01|N|
+|1|2|leia|2001-01-01|N|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+!|query| select * from s_t |
+|a|b|c?|row_load_dttm?|row_deleted_flag?|
+|1|1|han|fail[2001-01-01]|N|
+|1|2|chewbacca|fail[2001-01-01]|N|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+Delete rows
+!|insert|t|
+|a|b|c|
+|1|1|luke|
+
+!|insert|s_t|
+|a|b|c|row_load_dttm|row_deleted_flag|
+|1|1|luke|2001-01-01|N|
+|1|2|leia|2001-01-01|N|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+!|query| select * from s_t |
+|a|b|row_load_dttm?|row_deleted_flag?|
+|1|1|2001-01-01|N|
+|1|2|fail[2001-01-01]|Y|
+
+
+

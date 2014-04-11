@@ -1,0 +1,136 @@
+!4 Let's push a whole bunch of rows through and see how long it takes and if any errors pop up.
+
+!|execute| !- create table big_t (
+a number primary key,
+b varchar2(50) default 'skywalker',
+c varchar2(50) default 'skywalker',
+d varchar2(50) default 'skywalker',
+e varchar2(50) default 'skywalker',
+f varchar2(50) default 'skywalker',
+g varchar2(50) default 'skywalker',
+h varchar2(50) default 'skywalker',
+i varchar2(50) default 'skywalker',
+j varchar2(50) default 'skywalker',
+k varchar2(50) default 'skywalker',
+l varchar2(50) default 'skywalker',
+m varchar2(50) default 'skywalker',
+n varchar2(50) default 'skywalker',
+o varchar2(50) default 'skywalker',
+p varchar2(50) default 'skywalker',
+q varchar2(50) default 'skywalker',
+r varchar2(50) default 'skywalker',
+s varchar2(50) default 'skywalker',
+t varchar2(50) default 'skywalker',
+u varchar2(50) default 'skywalker',
+v varchar2(50) default 'skywalker',
+w varchar2(50) default 'skywalker',
+x varchar2(50) default 'skywalker',
+y varchar2(50) default 'skywalker',
+z varchar2(50) default 'skywalker'
+) -! |
+
+!|execute| !- create table big_s_t (
+a number primary key,
+row_load_dttm date,
+row_deleted_flag varchar2(1) default 'N',
+b varchar2(50) default 'skywalker',
+c varchar2(50) default 'skywalker',
+d varchar2(50) default 'skywalker',
+e varchar2(50) default 'skywalker',
+f varchar2(50) default 'skywalker',
+g varchar2(50) default 'skywalker',
+h varchar2(50) default 'skywalker',
+i varchar2(50) default 'skywalker',
+j varchar2(50) default 'skywalker',
+k varchar2(50) default 'skywalker',
+l varchar2(50) default 'skywalker',
+m varchar2(50) default 'skywalker',
+n varchar2(50) default 'skywalker',
+o varchar2(50) default 'skywalker',
+p varchar2(50) default 'skywalker',
+q varchar2(50) default 'skywalker',
+r varchar2(50) default 'skywalker',
+s varchar2(50) default 'skywalker',
+t varchar2(50) default 'skywalker',
+u varchar2(50) default 'skywalker',
+v varchar2(50) default 'skywalker',
+w varchar2(50) default 'skywalker',
+x varchar2(50) default 'skywalker',
+y varchar2(50) default 'skywalker',
+z varchar2(50) default 'skywalker'
+) -! |
+
+!|insert| meta_sync_columns |
+|source_column|sync_column|
+|a|a|
+|b|b|
+|c|c|
+|d|d|
+|e|e|
+|f|f|
+|g|g|
+|h|h|
+|i|i|
+|j|j|
+|k|k|
+|l|l|
+|m|m|
+|n|n|
+|o|o|
+|p|p|
+|q|q|
+|r|r|
+|s|s|
+|t|t|
+|u|u|
+|v|v|
+|w|w|
+|x|x|
+|y|y|
+|z|z|
+!|commit|
+
+!define sourceTable {big_t}
+!define syncTable {big_s_t}
+
+!|execute| !-
+begin
+  for i in 1..50000 loop
+    insert into big_t (a) values (i);
+  end loop;
+end;
+-! |
+!|commit|
+
+!|execute| !-
+begin
+  for i in 1..20000 loop
+    insert into big_s_t (a, b, row_load_dttm) values (i, 'skytalker', to_date('2013-01-01','yyyy-mm-dd'));
+  end loop;
+end;
+-! |
+!|commit|
+
+|query | select sysdate from dual |
+|sysdate?|
+|>>starttime|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+!|inspect query | select (sysdate - :starttime) * 24 * 60 * 60 as seconds from dual |
+
+|query| select count(*) as row_count from big_s_t|
+|row_count|
+|50000|
+
+|query| select count(*) as row_count from big_s_t where row_load_dttm = to_date('2013-01-01','yyyy-mm-dd')|
+|row_count|
+|0|
+
+|query| select count(*) as row_count from big_s_t where b = 'skytalker'|
+|row_count|
+|0|
+
+!|execute| drop table big_t |
+!|execute| drop table big_s_t |

@@ -1,0 +1,14 @@
+!include -seamless <DataKeeperTests.SetUp
+
+
+!include CreateTableMetaJobs
+
+!include CreateTableMetaSyncTransformations
+
+!include CreateTableMetaMasterTransformations
+
+!include CreateTableMetaJobTasks
+
+!include CreateTableMetaSyncColumns
+
+!include CreateTableMetaConnections

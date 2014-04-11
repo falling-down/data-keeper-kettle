@@ -1,0 +1,5 @@
+!path lib/*.jar
+
+Tests and tables for metadata.
+
+!contents -R2 -g -p -f -h

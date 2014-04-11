@@ -1,0 +1,42 @@
+!include -setup MetaSetUp
+!4 Run a single transformation based on ID
+The ext-sync-table-job runs a single transformation. 
+It uses the transformation id to retrieve metadata from the meta tables and passes
+that information to ext-sync-table.
+
+Important note: For security reasons, we do not store database passwords (even encrypted ones) in the meta_connections table.
+However, we still need the password to connect to our source. The sync table job retrieves the password from a file named .passwords 
+on the local filesystem. It expects it to be located in the same directory as the job itself and the format to be:
+{{{
+local=password
+othersource=otherpassowrd
+...
+<connection_id>=<password>
+}}}
+where ''connection_id'' corresponds to meta_connections.connection_id. So remember you need to update this file when you edit meta_connections.
+
+!|insert| meta_sync_transformations |
+|transformation_key |transformation_id |source_connection_id |source_schema |source_table |sync_schema |sync_table |source_match_id |sync_match_id |source_filter |sync_filter|
+|0|star-wars|local|${sourceSchema}|${sourceTable}|${syncSchema}|${syncTable}|${sourceMatchId}|${syncMatchId}|null|null|
+
+Do a simple row test to check that sync table transformation actually ran.
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run job | ext-sync-table-job | with | TRANS_ID=star-wars |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|2013-02-03|
+
+Test failures
+!|update|meta_sync_transformations|
+|transformation_key|sync_table=|
+|0|wrong_table|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run job | ext-sync-table-job | with | TRANS_ID=star-wars |

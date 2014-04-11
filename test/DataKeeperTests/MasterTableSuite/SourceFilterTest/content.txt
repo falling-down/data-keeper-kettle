@@ -1,0 +1,14 @@
+!|insert|t|
+|a|b|
+|ID1|luke|
+|ID2|han|
+
+!|commit|
+
+!define sourceFilter {b != 'luke'}
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+|query|select * from mt|
+|mkey|mid?|
+|1|ID2|

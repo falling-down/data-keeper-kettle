@@ -1,0 +1,29 @@
+!|insert|t|
+|a|b|
+|ID1|luke|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+Row load datetime is populated.
+|query|select * from mt|
+|mkey|row_load_dttm?|
+|1|fail[null]|
+
+!|execute| delete from mt |
+
+!|insert|mt|
+|mkey|mid|row_load_dttm|
+|1|ID1|2013-06-30|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+Row load datetime does not get updated
+|query|select * from mt|
+|mkey|row_load_dttm?|
+|1|2013-06-30|

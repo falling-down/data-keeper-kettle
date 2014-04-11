@@ -1,0 +1,51 @@
+!include -setup MetaSetUp
+!4 Can use any environment as a source
+!5 Oracle
+
+Since we do not have multiple instances in our test environment, we will make use of the data guard server to test the non-trivial case.
+
+Trivial Case- local database
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|2013-02-03|
+
+If we use the wrong password it should fail.
+!define oraclePassword {wrongpassword}
+!|etlfit.RunKettleFixture|
+| reject | run transformation | ext-sync-table | with | ${syncParameters} |
+
+Non-trivial case
+!include -teardown DeleteRows
+!|execute| create table s_dual ( dummy varchar2(10), row_load_dttm date, row_deleted_flag varchar2(1) ) |
+
+!|insert| meta_sync_columns |
+|source_column|sync_column|
+|dummy|dummy|
+!|commit|
+
+!define sourceSchema {sys}
+!define sourceTable {dual}
+!define sourceMatchId {dummy}
+!define syncTable {s_dual}
+!define syncMatchId {dummy}
+!define oracleHost {oraprod02.thig.com}
+!define oracleDatabase {sbyprod}
+!define oracleUsername {reportadmin}
+!define oraclePassword {Encrypted 2be98afc86aa7f2e4cb2da167db80fe8a}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+!|query| select * from s_dual |
+|dummy|
+|X|
+
+!|execute | drop table s_dual |
+

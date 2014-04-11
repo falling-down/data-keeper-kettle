@@ -1,0 +1,14 @@
+!include -setup MetaSetUp
+!4 Sync single row
+!|insert| t |
+|a|b|c|
+|1|foo|2013-02-03|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+There should be one row in sync table and the data attributes from source should match in sync
+|query|select * from s_t |
+|a|b?|c?|
+|1|foo|2013-02-03|

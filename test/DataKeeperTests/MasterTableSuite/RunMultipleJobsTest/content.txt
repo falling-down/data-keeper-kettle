@@ -1,0 +1,101 @@
+!4 Run multiple transformations based on a defined job ID
+The arc-master-table-job runs a single transformation. 
+arc-master-job runs one or more transformations as defined in the metadata.
+
+!|insert| meta_jobs |
+|job_key|job_id|job_type_id|
+|1|star-wars|master|
+
+!|insert|meta_master_transformations|
+|transformation_key|transformation_id|source_schema|source_table|source_master_id|source_filter|master_schema|master_table|master_id|master_key|
+|1|ships|${sourceSchema}|${sourceTable}|${sourceMasterId}|null|${masterSchema}|${masterTable}|${masterId}|${masterKey}|
+|2|pilots|${sourceSchema}|${sourceTable}2|${sourceMasterId}|null|${masterSchema}|${masterTable}2|${masterId}|${masterKey}|
+
+!|insert| meta_job_tasks|
+|job_key|transformation_key|task_order|
+|1|1|1|
+|1|2|2|
+!|commit|
+
+!|execute| create table ${sourceTable}2 as select * from ${sourceTable} |
+!|execute| create table ${masterTable}2 as select * from ${masterTable} |
+
+Do a simple row tests to check that sync table transformations actually ran.
+!|insert| t |
+|a|b|
+|x-wing|rebels|
+
+!|insert| t2 |
+|a|b|
+|skywalker|luke|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run job | arc-master-job | with | JOB_ID=star-wars |
+
+|query|select * from ${masterTable} |
+|mkey|mid?|
+|1|x-wing|
+
+|query|select * from ${masterTable}2 |
+|mkey|mid?|
+|1|skywalker|
+
+Tasks ran in correct order
+|query| select count(*) as row_count from ${masterTable}, ${masterTable}2 where ${masterTable}.row_load_dttm < ${masterTable}2.row_load_dttm |
+|row_count|
+|1|
+
+!|execute|delete from ${masterTable}|
+!|execute|delete from ${masterTable}2|
+!|commit|
+
+One task failing does not stop the rest
+!|update|meta_master_transformations |
+|transformation_key|master_table=|
+|1|wrong_table|
+!|commit|
+
+But we still want the job itself to return as failed
+!|etlfit.RunKettleFixture|
+|reject| run job | arc-master-job | with | JOB_ID=star-wars |
+
+|query|select count(*) as row_count from ${masterTable} |
+|row_count|
+|0|
+
+|query|select * from ${masterTable}2 |
+|mkey|mid?|
+|1|skywalker|
+
+!|execute|delete from ${masterTable}|
+!|execute|delete from ${masterTable}2|
+!|commit|
+
+Test multiple transformations that populate same master table from different sources.
+!|update|meta_master_transformations |
+|transformation_key|master_table=|
+|1|${masterTable}|
+|2|${masterTable}|
+
+Just for kicks lets reverse the task order
+!|execute|delete from meta_job_tasks|
+
+!|insert| meta_job_tasks|
+|job_key|transformation_key|task_order|
+|1|1|2|
+|1|2|1|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run job | arc-master-job | with | JOB_ID=star-wars |
+
+|query|select * from ${masterTable} |
+|mkey|mid?|
+|1|skywalker|
+|2|x-wing|
+
+!|execute|drop table ${sourceTable}2|
+!|execute|drop table ${masterTable}2|
+

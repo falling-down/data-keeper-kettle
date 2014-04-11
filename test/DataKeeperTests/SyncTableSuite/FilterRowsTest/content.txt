@@ -1,0 +1,29 @@
+!include -setup MetaSetUp
+!4 Allow custom filtering of rows from synchronization
+
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+|2|leia|2013-06-07|
+!|commit|
+
+!define sourceFilter {b = 'luke'}
+!define syncFilter {b = 'luke'}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|
+|1|luke|
+
+!|execute| delete from s_t |
+!|commit|
+
+!define sourceFilter {c > to_date('2013-06-01';'yyyy-mm-dd')}
+!define syncFilter {c > to_date('2013-06-01';'yyyy-mm-dd')}
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|c?|
+|2|2013-06-07|

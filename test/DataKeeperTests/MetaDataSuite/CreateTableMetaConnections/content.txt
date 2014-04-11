@@ -1,0 +1,8 @@
+!|execute|!- create table meta_connections (
+connection_id varchar2(30) primary key,
+connection_type varchar2(30),
+oracle_host varchar2(255),
+oracle_port varchar2(30),
+oracle_database varchar2(30),
+oracle_username varchar2(30)
+) -!|

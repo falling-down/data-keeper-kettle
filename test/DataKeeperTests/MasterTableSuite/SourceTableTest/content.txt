@@ -1,0 +1,29 @@
+Test that any source table can be used.
+
+!|execute| create user dbfittest identified by "password" default tablespace users quota unlimited on users |
+
+!|execute|create table dbfittest.t2 (a2 varchar2(50), b2 varchar2(50) )|
+
+!define sourceSchema {dbfittest}
+!define sourceTable {t2}
+!define sourceMasterId {a2}
+
+!|insert|t|
+|a|b|
+|ID1|luke|
+
+!|insert|dbfittest.t2|
+|a2|b2|
+|ID2|han|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+!|query|select * from mt|
+|mkey|mid?|row_source_id?|
+|1|ID2|dbfittest.t2|
+
+!|execute|drop table dbfittest.t2|
+!|execute|drop user dbfittest cascade|

@@ -1,0 +1,82 @@
+!4 Run multiple transformations based on a defined job ID
+The ext-sync-table-job runs a single transformation. 
+ext-sync-job runs one or more transformations as defined in the metadata.
+
+!|insert| meta_jobs |
+|job_key|job_id|job_type_id|
+|1|star-wars|sync|
+
+!|insert| meta_sync_transformations |
+|transformation_key |transformation_id |source_connection_id |source_schema |source_table |sync_schema |sync_table |source_match_id |sync_match_id |source_filter |sync_filter|
+|1|new-hope|local|${sourceSchema}|${sourceTable}|${syncSchema}|${syncTable}|${sourceMatchId}|${syncMatchId}|null|null|
+|2|clone-wars|local|${sourceSchema}|${sourceTable}2|${syncSchema}|${syncTable}2|${sourceMatchId}|${syncMatchId}|null|null|
+
+!|insert| meta_sync_columns |
+|transformation_key|source_column|sync_column|
+|1|a|a|
+|1|b|b|
+|1|c|c|
+|2|a|a|
+|2|b|b|
+|2|c|c|
+
+!|insert| meta_job_tasks|
+|job_key|transformation_key|task_order|
+|1|1|1|
+|1|2|2|
+!|commit|
+
+!|execute| create table t2 as select * from t |
+!|execute| create table s_t2 as select * from s_t |
+
+Do a simple row tests to check that sync table transformations actually ran.
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+
+!|insert| t2 |
+|a|b|c|
+|1|anakin|2013-02-03|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run job | ext-sync-job | with | JOB_ID=star-wars |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|2013-02-03|
+
+|query|select * from s_t2 |
+|a|b?|c?|
+|1|anakin|2013-02-03|
+
+Tasks ran in correct order
+|query| select count(*) as row_count from s_t, s_t2 where s_t.row_load_dttm < s_t2.row_load_dttm |
+|row_count|
+|1|
+
+!|execute|delete from s_t|
+!|execute|delete from s_t2|
+!|commit|
+
+One task failing does not stop the rest
+!|update|meta_sync_transformations |
+|transformation_key|sync_table=|
+|1|wrong_table|
+!|commit|
+
+But we still want the job itself to return as failed
+!|etlfit.RunKettleFixture|
+|reject| run job | ext-sync-job | with | JOB_ID=star-wars |
+
+|query|select count(*) as row_count from s_t |
+|row_count|
+|0|
+
+|query|select * from s_t2 |
+|a|b?|c?|
+|1|anakin|2013-02-03|
+
+!|execute|drop table t2|
+!|execute|drop table s_t2|
+

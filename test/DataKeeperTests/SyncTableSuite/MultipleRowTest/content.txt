@@ -1,0 +1,53 @@
+!include -setup MetaSetUp
+!4 Can sync more than 1 row
+
+New rows
+!|insert| t |
+|a|b|c|
+|1|foo|2013-02-03|
+|2|droid|2011-05-05|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+Data and row meta populated for all rows
+|query|select * from s_t |
+|a|b?|c?|row_load_dttm?|row_deleted_flag?|
+|1|foo|2013-02-03|fail[null]|N|
+|2|droid|2011-05-05|fail[null]|N|
+
+Load datetimes match between new rows
+|query|select * from s_t where a = 1|
+|row_load_dttm?|
+|>>loadtime|
+
+|query|select * from s_t where a = 2|
+|a|row_load_dttm?|
+|2|<<loadtime|
+
+Only changed rows get updated
+|update|t|
+|a|b=|c=|
+|2|ewok|2010-06-06|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|row_load_dttm?|
+|1|foo|2013-02-03|<<loadtime|
+|2|ewok|2010-06-06|fail[<<loadtime]|
+
+Only deleted rows get deleted
+!|execute| delete from t where a = 2|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|row_load_dttm?|row_deleted_flag?|
+|1|<<loadtime|N|
+|2|fail[<<loadtime]|Y|

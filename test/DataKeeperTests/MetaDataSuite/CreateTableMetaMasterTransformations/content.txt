@@ -1,0 +1,12 @@
+!|execute|!- create table meta_master_transformations (
+transformation_key number(18) primary key,
+transformation_id varchar2(255),
+source_schema varchar2(255),
+source_table varchar2(255),
+source_master_id varchar2(255),
+master_schema varchar2(255),
+master_table varchar2(255),
+master_id varchar2(255),
+master_key varchar2(255),
+source_filter varchar2(255)
+) -!|

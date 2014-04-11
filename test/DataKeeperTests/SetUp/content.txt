@@ -1,0 +1,11 @@
+!|dbfit.OracleTest|
+!|connect|localhost:1521|dbfituser|password|xe|
+
+!|etlfit.RunKettleFixture|
+| set java home | /opt/jdk1.6 |
+| set kettle home | /home/pentaho |
+| set kettle directory | /opt/pentaho/data-integration/ |
+| set work directory | /home/pentaho/data-keeper-kettle/src/data-keeper/ |
+| set etl directory | /home/pentaho/data-keeper-kettle/src/data-keeper/ |
+| set read output | true |
+| set log level | Minimal |

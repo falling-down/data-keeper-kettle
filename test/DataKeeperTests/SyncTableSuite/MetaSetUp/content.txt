@@ -1,0 +1,6 @@
+!|insert| meta_sync_columns |
+|source_column|sync_column|
+|a|a|
+|b|b|
+|c|c|
+!|commit|

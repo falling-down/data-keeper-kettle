@@ -1,0 +1,67 @@
+!include -setup MetaSetUp
+!4 Row Deleted Flag starts as N then changes to Y when row deleted in source
+
+!|insert| t |
+|a|b|
+|1|foo|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t|
+|a|row_deleted_flag?|
+|1|N|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+!|insert|s_t|
+|a|row_deleted_flag|
+|1|N|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t|
+|a|row_deleted_flag?|
+|1|Y|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+!4 A deleted row does not get deleted again
+In other words, the load datetime is not constantly updated
+
+!|insert| s_t |
+|a|b|row_load_dttm|row_deleted_flag|
+|1|foo|2000-01-02|Y|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t|
+|a|row_load_dttm?|row_deleted_flag?|
+|1|2000-01-02|Y|
+
+!include -teardown DeleteRows
+!include -setup MetaSetUp
+
+!4 Rows can be undeleted
+!|insert| t|
+|a|b|
+|1|foo|
+
+!|insert| s_t |
+|a|b|row_load_dttm|row_deleted_flag|
+|1|foo|2000-01-02|Y|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t|
+|a|row_load_dttm?|row_deleted_flag?|
+|1|fail[2000-01-02]|N|

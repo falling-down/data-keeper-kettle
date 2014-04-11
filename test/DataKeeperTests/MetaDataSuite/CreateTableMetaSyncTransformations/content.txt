@@ -1,0 +1,13 @@
+!|execute|!- create table meta_sync_transformations (
+transformation_key number(18) primary key,
+transformation_id varchar2(255),
+source_connection_id varchar2(30),
+source_schema varchar2(255),
+source_table varchar2(255),
+sync_schema varchar2(255),
+sync_table varchar2(255),
+source_match_id varchar2(255),
+sync_match_id varchar2(255),
+source_filter varchar2(255),
+sync_filter varchar2(255)
+) -!|

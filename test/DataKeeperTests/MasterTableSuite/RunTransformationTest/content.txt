@@ -1,0 +1,3 @@
+!4 Transformation can execute
+!|etlfit.RunKettleFixture|
+| run transformation | arc-master-table | with | ${masterParameters} |

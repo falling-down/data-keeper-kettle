@@ -1,0 +1,41 @@
+!4 Can specify which columns to sync
+Can exclude source columns.
+!|insert| t |
+|a|b|c|
+|1|luke|2013-02-03|
+
+In this table we specify which columns we want to sync.
+!|insert| meta_sync_columns |
+|source_column|sync_column|
+|a|a|
+|b|b|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|null|
+
+!include -teardown DeleteRows
+
+Not all columns in source need be in sync. Add column d to force a mismatch of source to sync columns.
+!include -setup MetaSetUp
+!|execute|alter table t add( d varchar2(50) ) |
+
+!|insert| t |
+|a|b|c|d|
+|1|luke|2013-02-03|skywalker|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+|query|select * from s_t |
+|a|b?|c?|
+|1|luke|2013-02-03|
+
+!include -teardown DeleteRows
+!|execute|alter table t drop( d ) |
+

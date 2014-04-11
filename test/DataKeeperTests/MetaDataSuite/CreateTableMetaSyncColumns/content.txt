@@ -1,0 +1,5 @@
+!|execute|!- create table meta_sync_columns (
+transformation_key number(18) default 0,
+source_column varchar2(255),
+sync_column varchar2(255)
+) -!|

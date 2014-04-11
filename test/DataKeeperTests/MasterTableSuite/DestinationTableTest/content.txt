@@ -1,0 +1,30 @@
+Test that any properly defined master table can be used.
+
+!|execute| create user dbfittest identified by "password" default tablespace users quota unlimited on users |
+
+!|execute|create table dbfittest.mt2 (mkey2 number primary key, mid2 varchar2(50), row_load_dttm date, row_source_id varchar2(50) )|
+
+!define masterSchema {dbfittest}
+!define masterTable {mt2}
+!define masterId {mid2}
+!define masterKey {mkey2}
+
+!|insert|t|
+|a|b|
+|ID1|luke|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+!|query|select * from dbfittest.mt2|
+|mkey2|mid2?|
+|1|ID1|
+
+!|ordered query|select count(*) as row_count from mt|
+|row_count|
+|0|
+
+!|execute|drop table dbfittest.mt2|
+!|execute|drop user dbfittest cascade|

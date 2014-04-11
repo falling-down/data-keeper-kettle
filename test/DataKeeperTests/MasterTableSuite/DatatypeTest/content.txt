@@ -1,0 +1,15 @@
+!|execute|alter table t modify (a number)|
+!|execute|alter table mt modify (mid number)|
+
+!|insert|t|
+|a|b|
+|100|luke|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run transformation|arc-master-table|with|${masterParameters}|
+
+|query|select * from mt|
+|mkey|mid?|
+|1|100|

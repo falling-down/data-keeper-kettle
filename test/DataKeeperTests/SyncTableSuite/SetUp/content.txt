@@ -1,0 +1,53 @@
+!include -seamless <DataKeeperTests.SetUp
+
+!5 Create dummy source and sync table
+!|execute|create table t (a number primary key, b varchar2(50), c date)|
+!|execute|grant select, insert, update, delete on t to etladmin |
+!|execute|create table s_t (a number primary key, b varchar2(50), c date, row_load_dttm date, row_deleted_flag varchar2(1))|
+!|execute|grant select, insert, update, delete on s_t to etladmin |
+
+!5 Set common variables
+!define sourceSchema {dbfituser}
+!define sourceTable {t}
+!define sourceMatchId {a}
+!define syncSchema {dbfituser}
+!define syncTable {s_t}
+!define syncMatchId {a}
+!define sourceFilter {}
+!define syncFilter {}
+!define transKey {0}
+!define oracleHost {localhost}
+!define oraclePort {1521}
+!define oracleDatabase {xe}
+!define oracleUsername {dbfituser}
+!define oraclePassword {password}
+!define syncParameters {SOURCE_SCHEMA=${sourceSchema},
+SOURCE_TABLE=${sourceTable},
+SOURCE_MATCH_ID=${sourceMatchId},
+SOURCE_FILTER=${sourceFilter},
+SYNC_SCHEMA=${syncSchema},
+SYNC_TABLE=${syncTable}, 
+SYNC_MATCH_ID=${syncMatchId},
+SYNC_FILTER=${syncFilter},
+TRANS_KEY=${transKey},
+ORACLE_HOST=${oracleHost},
+ORACLE_PORT=${oraclePort},
+ORACLE_DATABASE=${oracleDatabase},
+ORACLE_USERNAME=${oracleUsername},
+ORACLE_PASSWORD=${oraclePassword}}
+
+!5 Create meta tables
+!include .DwTests.MetaDataSuite.CreateTableMetaJobs
+
+!include .DwTests.MetaDataSuite.CreateTableMetaSyncTransformations
+
+!include .DwTests.MetaDataSuite.CreateTableMetaJobTasks
+
+!include .DwTests.MetaDataSuite.CreateTableMetaSyncColumns
+
+!include .DwTests.MetaDataSuite.CreateTableMetaConnections
+
+!|insert| meta_connections|
+|connection_id |connection_type |oracle_host |oracle_port |oracle_database |oracle_username|
+|local|oracle|${oracleHost}|${oraclePort}|${oracleDatabase}|${oracleUsername}|
+!|commit|

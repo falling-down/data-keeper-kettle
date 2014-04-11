@@ -1,0 +1,15 @@
+Sync Table Suite
+
+Sync table should simply synchronize tables from the source to a staging version of the table called a sync table in the DW.
+
+This is a parametrized transformation that should be reusable with any database to database synchronization.
+
+The sync tables have two additional fields:
+ * row_load_dttm: The date and time the row is last loaded/updated
+ * row_deleted_flag: A boolean indicating if the row no longer exists in the source
+
+These fields are meant to serve as change data capture aids for downstream ETL.
+By default, sync table uses a merge strategy, not a truncate/load strategy. The row_deleted_flag is so we do not have to actually
+delete anything from the sync table. When a row is deleted, the row_load_dttm should also be updated.
+
+!contents -R2 -g -p -f -h

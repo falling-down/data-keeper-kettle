@@ -1,0 +1,18 @@
+Metadata driven Master tables
+
+Identical concept to Hub tables in the Data Vault framework, just a different name.
+
+Structure of generic master table
+|master_key|surrogate key (integer). The actual tables will not use this column name. e.g. mst_policy_key|
+|master_id|business identifier. The actual tables will not use this column name e.g. policy_id|
+|row_load_dttm|date and time the record was added to table|
+|row_source_id|description of the origin of the business identifier|
+
+Requirements:
+Business ids are only loaded once.
+Transformation should be flexible enough to work with any source table and any destination master table. (driven by metadata)
+
+Assumptions:
+For our purposes, assume sources are available on same database connection as destination i.e. the data warehouse
+
+!contents -R2 -g -p -f -h

@@ -1,0 +1,5 @@
+!|execute| drop table t |
+!|execute| drop table mt |
+!|execute| drop table meta_master_transformations |
+!|execute| drop table meta_job_tasks |
+!|execute| drop table meta_jobs |

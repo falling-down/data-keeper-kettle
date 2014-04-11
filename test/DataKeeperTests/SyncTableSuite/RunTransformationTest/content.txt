@@ -1,0 +1,7 @@
+!include -setup MetaSetUp
+
+!4 Transformation can execute
+!|etlfit.RunKettleFixture|
+| run transformation | ext-sync-table | with | ${syncParameters} |
+
+

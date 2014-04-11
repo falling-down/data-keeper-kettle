@@ -1,0 +1,5 @@
+!|execute|!- create table meta_job_tasks (
+job_key number(18),
+transformation_key number(18),
+task_order number(18) default 0
+) -!|

@@ -1,0 +1,6 @@
+!|execute| drop table meta_jobs |
+!|execute| drop table meta_job_tasks |
+!|execute| drop table meta_sync_transformations |
+!|execute| drop table meta_master_transformations |
+!|execute| drop table meta_connections |
+!|execute| drop table meta_sync_columns |

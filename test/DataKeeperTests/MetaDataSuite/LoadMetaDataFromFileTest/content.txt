@@ -1,0 +1,72 @@
+We have some test data in dw_metadata_test.xls that we use to verify that this loading
+transformation works as expected.
+
+!|etlfit.RunKettleFixture|
+| run transformation | load-metadata-from-file | with | META_SCHEMA=dbfituser, META_FILEPATH=/home/pentaho/data-keeper-kettle/test/dw_metadata_test.xls |
+
+!|query| select * from meta_connections |
+|connection_id|connection_type?|oracle_host?|oracle_port?|oracle_database?|oracle_username?|
+|local|oracle|localhost|1521|xe|dbfituser|
+
+!|query| select * from meta_jobs |
+|job_id|job_description?|job_type_id?|job_key?|
+|star-wars|A test job|sync|>>starwars|
+|star-trek|Another test job|sync|>>startrek|
+|starships|testing testing|master|>>starships|
+|pilots|more testing|master|>>pilots|
+
+!|query| select * from meta_sync_transformations |
+|transformation_id|source_connection_id?|source_schema?|source_table?|sync_schema?|sync_table?|source_match_id?|sync_match_id?|source_filter?|sync_filter?|transformation_key?|
+|new-hope|local|dbfituser|t|dbfituser|s_t|a|a|null|null|>>newhope|
+|clone-wars|local|dbfituser|t2|dbfituser|s_t2|a|a|null|null|>>clonewars|
+|kirk|local|dbfituser|t|dbfituser|s_t|a|a|null|null|>>kirk|
+|spock|local|dbfituser|t|dbfituser|s_t|a|a|null|null|>>spock|
+|sulu|local|dbfituser|t|dbfituser|s_t|a|a|b = 'enterprise'|b = 'enterprise'|>>sulu|
+|scotty|local|dbfituser|t|dbfituser|s_t|a|a|null|null|>>scotty|
+
+!|query| select * from meta_sync_columns |
+|transformation_key|source_column|sync_column?|
+|<<newhope|a|a|
+|<<newhope|b|b|
+|<<newhope|c|c|
+|<<clonewars|a|a|
+|<<clonewars|b|b|
+|<<clonewars|c|c|
+|<<kirk|a|a|
+|<<kirk|b|b|
+|<<kirk|c|c|
+|<<spock|a|a|
+|<<spock|b|b|
+|<<spock|c|c|
+|<<sulu|a|a|
+|<<sulu|b|b|
+|<<sulu|c|c|
+|<<scotty|a|a|
+|<<scotty|b|b|
+|<<scotty|c|c|
+
+!|query| select * from meta_master_transformations |
+|transformation_id|source_schema?|source_table?|source_master_id?|master_schema?|master_table?|master_id?|master_key?|source_filter?|transformation_key?|
+|x-wing|dbfituser|t|a|dbfituser|mt|mid|mkey|null|>>xwing|
+|y-wing|dbfituser|t|a|dbfituser|mt|mid|mkey|null|>>ywing|
+|death-star|dbfituser|t|a|dbfituser|mt|mid|mkey|b = 'level 5'|>>deathstar|
+|skywalker|dbfituser|t|a|dbfituser|mt|mid|mkey|null|>>skywalker|
+|solo|dbfituser|t|a|dbfituser|mt|mid|mkey|null|>>solo|
+|darth-vader|dbfituser|t|a|dbfituser|mt|mid|mkey|null|>>darthvader|
+
+!|query| select * from meta_job_tasks |
+|job_key|transformation_key|task_order?|
+|<<starwars|<<newhope|1|
+|<<starwars|<<clonewars|2|
+|<<startrek|<<kirk|0|
+|<<startrek|<<spock|0|
+|<<startrek|<<sulu|0|
+|<<startrek|<<scotty|0|
+|<<starships|<<xwing|1|
+|<<starships|<<ywing|2|
+|<<starships|<<deathstar|3|
+|<<pilots|<<skywalker|0|
+|<<pilots|<<solo|2|
+|<<pilots|<<darthvader|1|
+
+

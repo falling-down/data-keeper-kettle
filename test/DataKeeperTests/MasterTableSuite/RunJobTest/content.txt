@@ -1,0 +1,31 @@
+The master table job takes a single transformation id as a parameter
+and retrieves meta data from meta_master_transformations to use as
+parameters to run the master table transformation.
+
+!|insert|meta_master_transformations|
+|transformation_key|transformation_id|source_schema|source_table|source_master_id|source_filter|master_schema|master_table|master_id|master_key|
+|0|ships|${sourceSchema}|${sourceTable}|${sourceMasterId}|null|${masterSchema}|${masterTable}|${masterId}|${masterKey}|
+
+Pass a single row to test that transformation actually ran.
+!|insert|t|
+|a|b|
+|x-wing|luke|
+
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run job|arc-master-table-job|with|TRANS_ID=ships|
+
+!|query|select * from mt|
+|mkey|mid?|
+|1|x-wing|
+
+Test failures.
+Job should always return successful.
+!|update|meta_master_transformations|
+|transformation_key|master_table=|
+|0|wrong_table|
+!|commit|
+
+!|etlfit.RunKettleFixture|
+|run job|arc-master-table-job|with|TRANS_ID=ships|

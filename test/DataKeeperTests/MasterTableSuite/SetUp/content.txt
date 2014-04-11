@@ -1,0 +1,31 @@
+!include -seamless <DataKeeperTests.SetUp
+
+!5 Create dummy source and master table
+!|execute|create table t (a varchar2(50) primary key, b varchar2(50))|
+!|execute|create table mt (mkey number primary key, mid varchar2(50), row_load_dttm date, row_source_id varchar2(255))|
+
+
+!5 Set common variables
+!define sourceSchema {dbfituser}
+!define sourceTable {t}
+!define sourceMasterId {a}
+!define masterSchema {dbfituser}
+!define masterTable {mt}
+!define masterId {mid}
+!define masterKey {mkey}
+!define sourceFilter {}
+!define masterParameters {SOURCE_SCHEMA=${sourceSchema},
+SOURCE_TABLE=${sourceTable},
+SOURCE_MASTER_ID=${sourceMasterId},
+SOURCE_FILTER=${sourceFilter},
+MASTER_SCHEMA=${masterSchema},
+MASTER_TABLE=${masterTable}, 
+MASTER_ID=${masterId},
+MASTER_KEY=${masterKey}}
+
+!5 Create meta tables
+!include .DwTests.MetaDataSuite.CreateTableMetaJobs
+
+!include .DwTests.MetaDataSuite.CreateTableMetaMasterTransformations
+
+!include .DwTests.MetaDataSuite.CreateTableMetaJobTasks

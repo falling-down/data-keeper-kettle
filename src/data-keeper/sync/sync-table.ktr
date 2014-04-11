@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>ext-sync-table</name>
+    <description>Synchronize data between two sources</description>
+    <extended_description>This transformation creates ETL at runtime to process the synchronization
+of two tables.</extended_description>
+    <trans_version/>
+    <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
+    <directory>&#47;</directory>
+    <parameters>
+        <parameter>
+            <name>ORACLE_DATABASE</name>
+            <default_value/>
+            <description>The name of the source Oracle database.</description>
+        </parameter>
+        <parameter>
+            <name>ORACLE_HOST</name>
+            <default_value/>
+            <description>The host url for the source Oracle database.</description>
+        </parameter>
+        <parameter>
+            <name>ORACLE_PASSWORD</name>
+            <default_value/>
+            <description>The password for the source Oracle user.</description>
+        </parameter>
+        <parameter>
+            <name>ORACLE_PORT</name>
+            <default_value/>
+            <description>The port number of the source Oracle database.</description>
+        </parameter>
+        <parameter>
+            <name>ORACLE_USERNAME</name>
+            <default_value/>
+            <description>The user of the source Oracle database.</description>
+        </parameter>
+        <parameter>
+            <name>SOURCE_FILTER</name>
+            <default_value>1=1</default_value>
+            <description>Expression to limit the rows in the synchronization. Be sure to define SYNC_FILTER to complement.</description>
+        </parameter>
+        <parameter>
+            <name>SOURCE_MATCH_ID</name>
+            <default_value/>
+            <description>The unique id from the source used to match rows. Can be an expression or view column.</description>
+        </parameter>
+        <parameter>
+            <name>SOURCE_SCHEMA</name>
+            <default_value>NO_SCHEMA_PROVIDED</default_value>
+            <description>The name of the schema that owns the source table.</description>
+        </parameter>
+        <parameter>
+            <name>SOURCE_TABLE</name>
+            <default_value>NO_TABLE_PROVIDED</default_value>
+            <description>The name of the source table.</description>
+        </parameter>
+        <parameter>
+            <name>SYNC_FILTER</name>
+            <default_value>1=1</default_value>
+            <description>Expression to limit the rows in the synchronization. Be sure to define SOURCE_FILTER to complement.</description>
+        </parameter>
+        <parameter>
+            <name>SYNC_MATCH_ID</name>
+            <default_value/>
+            <description>The unique id from the destination used to match rows. Can be an expression or view column.</description>
+        </parameter>
+        <parameter>
+            <name>SYNC_SCHEMA</name>
+            <default_value>NO_SCHEMA_PROVIDED</default_value>
+            <description>The name of the schema that owns the destination table.</description>
+        </parameter>
+        <parameter>
+            <name>SYNC_TABLE</name>
+            <default_value>NO_TABLE_PROVIDED</default_value>
+            <description>The name of the destination table.</description>
+        </parameter>
+        <parameter>
+            <name>TRANS_KEY</name>
+            <default_value/>
+            <description>The surrogate key of the transformation configuration defined in meta tables.</description>
+        </parameter>
+    </parameters>
+    <log>
+<trans-log-table><connection>${PDI_LOG_DB}</connection>
+<schema/>
+<table>${PDI_TRANS_LOG_TABLE}</table>
+<size_limit_lines/>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STATUS</id><enabled>Y</enabled><name>STATUS</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name><subject/></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name><subject/></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name><subject/></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name><subject/></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name><subject/></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name><subject/></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>STARTDATE</id><enabled>Y</enabled><name>STARTDATE</name></field><field><id>ENDDATE</id><enabled>Y</enabled><name>ENDDATE</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>DEPDATE</id><enabled>Y</enabled><name>DEPDATE</name></field><field><id>REPLAYDATE</id><enabled>Y</enabled><name>REPLAYDATE</name></field><field><id>LOG_FIELD</id><enabled>Y</enabled><name>LOG_FIELD</name></field></trans-log-table>
+<perf-log-table><connection>${PDI_LOG_DB}</connection>
+<schema/>
+<table>${PDI_TRANS_PERFORMANCE_LOG_TABLE}</table>
+<interval/>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>SEQ_NR</id><enabled>Y</enabled><name>SEQ_NR</name></field><field><id>LOGDATE</id><enabled>Y</enabled><name>LOGDATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>INPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>INPUT_BUFFER_ROWS</name></field><field><id>OUTPUT_BUFFER_ROWS</id><enabled>Y</enabled><name>OUTPUT_BUFFER_ROWS</name></field></perf-log-table>
+<channel-log-table><connection>${PDI_LOG_DB}</connection>
+<schema/>
+<table>${PDI_CHANNEL_LOG_TABLE}</table>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>LOGGING_OBJECT_TYPE</id><enabled>Y</enabled><name>LOGGING_OBJECT_TYPE</name></field><field><id>OBJECT_NAME</id><enabled>Y</enabled><name>OBJECT_NAME</name></field><field><id>OBJECT_COPY</id><enabled>Y</enabled><name>OBJECT_COPY</name></field><field><id>REPOSITORY_DIRECTORY</id><enabled>Y</enabled><name>REPOSITORY_DIRECTORY</name></field><field><id>FILENAME</id><enabled>Y</enabled><name>FILENAME</name></field><field><id>OBJECT_ID</id><enabled>Y</enabled><name>OBJECT_ID</name></field><field><id>OBJECT_REVISION</id><enabled>Y</enabled><name>OBJECT_REVISION</name></field><field><id>PARENT_CHANNEL_ID</id><enabled>Y</enabled><name>PARENT_CHANNEL_ID</name></field><field><id>ROOT_CHANNEL_ID</id><enabled>Y</enabled><name>ROOT_CHANNEL_ID</name></field></channel-log-table>
+<step-log-table><connection>${PDI_LOG_DB}</connection>
+<schema/>
+<table>${PDI_STEP_LOG_TABLE}</table>
+<timeout_days/>
+<field><id>ID_BATCH</id><enabled>Y</enabled><name>ID_BATCH</name></field><field><id>CHANNEL_ID</id><enabled>Y</enabled><name>CHANNEL_ID</name></field><field><id>LOG_DATE</id><enabled>Y</enabled><name>LOG_DATE</name></field><field><id>TRANSNAME</id><enabled>Y</enabled><name>TRANSNAME</name></field><field><id>STEPNAME</id><enabled>Y</enabled><name>STEPNAME</name></field><field><id>STEP_COPY</id><enabled>Y</enabled><name>STEP_COPY</name></field><field><id>LINES_READ</id><enabled>Y</enabled><name>LINES_READ</name></field><field><id>LINES_WRITTEN</id><enabled>Y</enabled><name>LINES_WRITTEN</name></field><field><id>LINES_UPDATED</id><enabled>Y</enabled><name>LINES_UPDATED</name></field><field><id>LINES_INPUT</id><enabled>Y</enabled><name>LINES_INPUT</name></field><field><id>LINES_OUTPUT</id><enabled>Y</enabled><name>LINES_OUTPUT</name></field><field><id>LINES_REJECTED</id><enabled>Y</enabled><name>LINES_REJECTED</name></field><field><id>ERRORS</id><enabled>Y</enabled><name>ERRORS</name></field><field><id>LOG_FIELD</id><enabled>N</enabled><name>LOG_FIELD</name></field></step-log-table>
+    </log>
+    <maxdate>
+      <connection/>
+      <table/>
+      <field/>
+      <offset>0.0</offset>
+      <maxdiff>0.0</maxdiff>
+    </maxdate>
+    <size_rowset>10000</size_rowset>
+    <sleep_time_empty>50</sleep_time_empty>
+    <sleep_time_full>50</sleep_time_full>
+    <unique_connections>N</unique_connections>
+    <feedback_shown>Y</feedback_shown>
+    <feedback_size>50000</feedback_size>
+    <using_thread_priorities>Y</using_thread_priorities>
+    <shared_objects_file/>
+    <capture_step_performance>N</capture_step_performance>
+    <step_performance_capturing_delay>1000</step_performance_capturing_delay>
+    <step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+    <dependencies>
+    </dependencies>
+    <partitionschemas>
+    </partitionschemas>
+    <slaveservers>
+    </slaveservers>
+    <clusterschemas>
+    </clusterschemas>
+  <created_user>-</created_user>
+  <created_date>2013&#47;10&#47;30 09:16:06.395</created_date>
+  <modified_user>-</modified_user>
+  <modified_date>2013&#47;10&#47;30 09:16:06.395</modified_date>
+  </info>
+  <notepads>
+    <notepad>
+      <note>This transformation uses parameters and metadata to create
+a synchronization ETL at runtime. 
+
+See ext-sync-table-meta for more notes.
+
+See transformation settings for list of defined parameters.</note>
+      <xloc>37</xloc>
+      <yloc>271</yloc>
+      <width>404</width>
+      <heigth>100</heigth>
+      <fontname>Sans</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
+  </notepads>
+  <connection>
+    <name>dw</name>
+    <server>${DW_HOST}</server>
+    <type>ORACLE</type>
+    <access>Native</access>
+    <database>${DW_DATABASE}</database>
+    <port>1521</port>
+    <username>${DW_USER}</username>
+    <password>${DW_PASSWORD}</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute><code>EXTRA_OPTION_ORACLE.defaultRowPrefetch</code><attribute>50</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
+      <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
+      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>N</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
+    </attributes>
+  </connection>
+  <connection>
+    <name>logdb</name>
+    <server>${LOG_HOST}</server>
+    <type>ORACLE</type>
+    <access>Native</access>
+    <database>${LOG_DATABASE}</database>
+    <port>1521</port>
+    <username>${LOG_USER}</username>
+    <password>${LOG_PASSWORD}</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute><code>EXTRA_OPTION_ORACLE.SEQUENCE_FOR_BATCH_ID</code><attribute>LOG_BATCH_SEQ</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
+      <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
+      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>N</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
+    </attributes>
+  </connection>
+  <order>
+  <hop> <from>Read sync meta</from><to>merge streams</to><enabled>Y</enabled> </hop>  <hop> <from>Always included columns</from><to>merge streams</to><enabled>Y</enabled> </hop>  <hop> <from>merge streams</from><to>Sync Metadata Injection</to><enabled>Y</enabled> </hop>  </order>
+  <step>
+    <name>Always included columns</name>
+    <type>DataGrid</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <fields>
+      <field>
+        <name>SOURCE_COLUMN</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>255</length>
+        <precision>-1</precision>
+      </field>
+      <field>
+        <name>SYNC_COLUMN</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <length>255</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+    <data>
+      <line> <item>MATCH_ID_</item><item>MATCH_ID_</item> </line>
+      <line> <item>ROW_DELETED_FLAG</item><item>ROW_DELETED_FLAG</item> </line>
+    </data>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>255</xloc>
+      <yloc>187</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Read sync meta</name>
+    <type>TableInput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <connection>dw</connection>
+    <sql>select
+	source_column,
+	sync_column
+from ${META_SCHEMA}.meta_sync_columns
+where
+	transformation_key = ${TRANS_KEY}
+</sql>
+    <limit>0</limit>
+    <lookup/>
+    <execute_each_row>N</execute_each_row>
+    <variables_active>Y</variables_active>
+    <lazy_conversion_active>N</lazy_conversion_active>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>104</xloc>
+      <yloc>89</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>Sync Metadata Injection</name>
+    <type>MetaInject</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+    <specification_method>filename</specification_method>
+    <trans_object_id/>
+    <trans_name/>
+    <filename>${Internal.Transformation.Filename.Directory}&#47;ext-sync-table-meta.ktr</filename>
+    <directory_path/>
+    <source_step/>
+    <mappings>      <mapping>        <target_step_name>Select source fields</target_step_name>
+        <target_attribute_key>FIELD_RENAME</target_attribute_key>
+        <target_detail>Y</target_detail>
+        <source_step>merge streams</source_step>
+        <source_field>SYNC_COLUMN</source_field>
+      </mapping>      <mapping>        <target_step_name>Select sync fields</target_step_name>
+        <target_attribute_key>FIELD_NAME</target_attribute_key>
+        <target_detail>Y</target_detail>
+        <source_step>merge streams</source_step>
+        <source_field>SYNC_COLUMN</source_field>
+      </mapping>      <mapping>        <target_step_name>Select source fields</target_step_name>
+        <target_attribute_key>FIELD_NAME</target_attribute_key>
+        <target_detail>Y</target_detail>
+        <source_step>merge streams</source_step>
+        <source_field>SOURCE_COLUMN</source_field>
+      </mapping>    </mappings>     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>406</xloc>
+      <yloc>89</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step>
+    <name>merge streams</name>
+    <type>Dummy</type>
+    <description/>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+         <partitioning>
+           <method>none</method>
+           <schema_name/>
+           </partitioning>
+     <cluster_schema/>
+ <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
+      <xloc>255</xloc>
+      <yloc>89</yloc>
+      <draw>Y</draw>
+      </GUI>
+    </step>
+
+  <step_error_handling>
+  </step_error_handling>
+   <slave-step-copy-partition-distribution>
+</slave-step-copy-partition-distribution>
+   <slave_transformation>N</slave_transformation>
+</transformation>

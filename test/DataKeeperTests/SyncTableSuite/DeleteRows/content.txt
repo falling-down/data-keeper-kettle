@@ -1,0 +1,4 @@
+!|execute|delete from t |
+!|execute|delete from s_t |
+!|execute|delete from meta_sync_columns |
+!|commit|
