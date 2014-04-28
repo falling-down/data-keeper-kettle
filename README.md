@@ -1,4 +1,4 @@
-data-keeper-kettle
+Kettle Staging Factory
 ==================
 
-Data Keeper framework implemented with Pentaho Kettle
+A metadata driven staging framework.
